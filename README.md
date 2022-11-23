@@ -1,1 +1,1 @@
-# python-automation
+# python-aws-automation
