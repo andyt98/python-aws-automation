@@ -10,17 +10,24 @@ EMAIL_ADDRESS = os.environ.get('EMAIL_ADDRESS')
 EMAIL_PASSWORD = os.environ.get('EMAIL_PASSWORD')
 LINODE_TOKEN = os.environ.get('LINODE_TOKEN')
 
+linode_instance = 24920590
+url = 'http://li1388-236.members.linode.com:8080/'
+hostname = '139.162.130.236'
+username = 'root'
+key_filename = '/home/andy/.ssh/id_rsa'
+container_name = 'c3e706bc905e'
+
 
 def restart_server_and_container():
     # restart linode server
     print('Rebooting the server...')
     client = linode_api4.LinodeClient(LINODE_TOKEN)
-    nginx_server = client.load(linode_api4.Instance, 24920590)
+    nginx_server = client.load(linode_api4.Instance, linode_instance)
     nginx_server.reboot()
 
     # restart the application
     while True:
-        nginx_server = client.load(linode_api4.Instance, 24920590)
+        nginx_server = client.load(linode_api4.Instance, linode_instance)
         if nginx_server.status == 'running':
             time.sleep(5)
             restart_container()
@@ -41,15 +48,15 @@ def restart_container():
     print('Restarting the application...')
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(hostname='139.162.130.236', username='root', key_filename='/Users/nanajanashia/.ssh/id_rsa')
-    stdin, stdout, stderr = ssh.exec_command('docker start c3e706bc905e')
+    ssh.connect(hostname=hostname, username=username, key_filename=key_filename)
+    stdin, stdout, stderr = ssh.exec_command('docker start %s' % container_name)
     print(stdout.readlines())
     ssh.close()
 
 
 def monitor_application():
     try:
-        response = requests.get('http://li1388-236.members.linode.com:8080/')
+        response = requests.get('%s' % url)
         if response.status_code == 200:
             print('Application is running successfully!')
         else:

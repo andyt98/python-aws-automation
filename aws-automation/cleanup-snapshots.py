@@ -3,6 +3,8 @@ from operator import itemgetter
 
 ec2_client = boto3.client('ec2', region_name="eu-west-3")
 
+# Cleanup snapshots, leave only the last 2 for each ec2 instance
+
 volumes = ec2_client.describe_volumes(
     Filters=[
         {
